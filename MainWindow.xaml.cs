@@ -23,9 +23,10 @@ namespace vule_macro
         public MainWindow()
         {
             InitializeComponent();
+            WindowsAPI.InitKeyMap();
             MacroScript script = new MacroScript();
-            script.ParseFile(@"C:\Users\uskok\source\repos\New Text Document.txt");
-            //script.Execute();
+            script.ParseFile(@"C:\Users\uskok\Desktop\SCRIPT.txt");
+            script.Execute();
         }
 
         #region UI Code

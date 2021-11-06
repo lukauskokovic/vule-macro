@@ -6,6 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 public class MacroScript
 {
+    public int CurrentLine = 0;
     public List<Instruction> Instructions = new List<Instruction>();
 
     public void ParseFile(string FilePath)
@@ -34,6 +35,12 @@ public class MacroScript
                 case "SLEEP":
                     instruction = new SleepInstruction();
                     break;
+                case "JUMP":
+                    instruction = new JumpInstruction(this);
+                    break;
+                case "KEY":
+                    instruction = new KeyInstruction();
+                    break;
             }
             if(instruction != null)
             {
@@ -46,7 +53,7 @@ public class MacroScript
     public void Execute()
     {
         Console.WriteLine("Executing");
-        foreach (Instruction instruction in Instructions)
-            instruction.Execute();
+        for (CurrentLine = 0; CurrentLine < Instructions.Count; CurrentLine++)
+            Instructions[CurrentLine].Execute();
     }
 }
