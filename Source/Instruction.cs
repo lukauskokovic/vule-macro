@@ -4,6 +4,7 @@ using System.Runtime.InteropServices;
 using System.Threading;
 using System.Windows;
 using static WindowsAPI;
+using static PrasingHelper;
 
 public abstract class Instruction
 {
@@ -11,6 +12,7 @@ public abstract class Instruction
     public string[] parameters;
     public abstract void Execute();
     public abstract void Parse();
+    public abstract string Compile();
 }
 
 /// <summary>
@@ -30,32 +32,35 @@ public class SleepInstruction : Instruction
             return;
         
         string timeStr = parameters[0];
-        string unitStr = "";
+        Unit = "";
         int time = 0;
         for (int i = 0; i < timeStr.Length; i++)
         {
             char c = timeStr[i];
             int numberValue;
-            if (c == 'm' || c == 's' || c == 'M' || c == 'S') unitStr += c;
+            Console.WriteLine(isParam(c, "ms"));
+            if (isParam(c, "ms")) Unit += char.ToUpper(c);
             else if((numberValue = c - '0') < 10)
             {
                 time *= 10;
                 time += numberValue;
             }
         }
-        Unit = unitStr.ToUpper();
         Value = time;
         Console.WriteLine("SLEEP> Value'{0}' Unit:'{1}'", Value, Unit);
     }
 
     public override void Execute()
     {
+        
         int time = 1;
         if (Unit == "MS") time = Value;
         else if (Unit == "S") time = Value * 1000;
         else if (Unit == "M") time = Value * 1000 * 60;
         Thread.Sleep(time);
     }
+
+    public override string Compile() => string.Format("SLEEP {0}{1}", Value, Unit);
 }
 /// <summary>
 /// Example
@@ -77,8 +82,9 @@ public class CursorInstruction : Instruction
     public override void Parse()
     {
         if (parameters.Length != 3) return;
+        parameters[0] = parameters[0].ToUpper();
         for(int i = 0; i < ValidTypes.Length; i++)
-            if(parameters[0].ToLower() == ValidTypes[i].ToLower())
+            if(parameters[0] == ValidTypes[i])
                 Type = ValidTypes[i];
 
         if (!int.TryParse(parameters[1], out ValueX)) return;
@@ -96,6 +102,8 @@ public class CursorInstruction : Instruction
             mouse_event(0x0001, ValueX, ValueY, 0, (UIntPtr)0);
         }
     }
+
+    public override string Compile() => string.Format("CURSOR {0} {1} {2}", Type, ValueX, ValueY);
 }
 /// <summary>
 /// Example
@@ -116,20 +124,43 @@ public class MouseInstruction : Instruction
 
     public override void Parse()
     {
-        if (parameters.Length != 2) return;
+        if(parameters.Length == 1)
+        {
+            if (!isParam(parameters[0], "LEFT", "RIGHT")) return;
+            Direction = "PRESS";
+            Button = parameters[0].ToUpper();
+            return;
+        }
 
-        if (parameters[0].ToUpper() == "DOWN" || parameters[0].ToUpper() == "UP") Direction = parameters[0].ToUpper();
-        else return;
-        if (parameters[1].ToUpper() == "LEFT" || parameters[1].ToUpper() == "RIGHT") Button = parameters[1].ToUpper();
-        else return;
+        if (parameters.Length != 2) return;
+        parameters[0] = parameters[0].ToUpper();
+        parameters[1] = parameters[1].ToUpper();
+
+        if (!isParam(parameters[0], "UP", "DOWN") || !isParam(parameters[1], "LEFT", "RIGHT")) return;
+        Direction = parameters[0];
+        Button = parameters[1];
 
         Console.WriteLine("MOUSE> Direction:'{0}' Button:'{1}'", Direction, Button);
     }
 
     public override void Execute()
     {
-        mouse_event(Direction == "UP"? Button == "LEFT" ? LEFT_UP : RIGHT_UP:
-                                        Button == "LEFT"? LEFT_DOWN : RIGHT_DOWN, 0, 0, 0, (UIntPtr)0);
+        if (Direction == null) return;
+        if(Direction == "PRESS")
+        {
+            mouse_event(Button == "LEFT" ? LEFT_DOWN : RIGHT_DOWN, 0, 0, 0, (UIntPtr)0);
+            mouse_event(Button == "LEFT" ? LEFT_UP : RIGHT_UP, 0, 0, 0, (UIntPtr)0);
+            return;
+        }
+        mouse_event(Direction == "UP" ? Button == "LEFT" ? LEFT_UP : RIGHT_UP :
+                                        Button == "LEFT" ? LEFT_DOWN : RIGHT_DOWN, 0, 0, 0, (UIntPtr)0);
+    }
+
+    public override string Compile()
+    {
+        if (Direction == null) return "";
+        else if (Direction == "PRESS") return string.Format("MOUSE {0}", Button);
+        else return string.Format("MOUSE {0} {1}", Direction, Button);
     }
 }
 
@@ -158,6 +189,12 @@ public class JumpInstruction : Instruction
         }
         Console.WriteLine("JUMP> Line:'{0}'", Line);
     }
+
+    public override string Compile()
+    {
+        if (Line < 0) return "";
+        else return "JUMP " + Line;
+    }
 }
 /// <summary>
 /// EXAMPLE
@@ -171,6 +208,7 @@ public class KeyInstruction : Instruction
               KEYDOWN = 0x0000;
     public string TYPE = null;
     public int Key = -1;
+    private string KeyName = "A";
     public KeyInstruction() { Name = "KEY"; }
     public override void Parse()
     {
@@ -179,6 +217,7 @@ public class KeyInstruction : Instruction
 
         if (!KeyMap.ContainsKey(parameters[0])) return;
         Key = KeyMap[parameters[0]];
+        KeyName = parameters[0];
         if (parameters.Length == 2 && (parameters[1].ToUpper() == "HOLD" || parameters[1].ToUpper() == "RELEASE")) TYPE = (parameters[1].ToUpper() == "HOLD") ? "HOLD" : "RELEASE";
         else TYPE = "PRESS";
 
@@ -187,7 +226,6 @@ public class KeyInstruction : Instruction
     public override void Execute()
     {
         if (TYPE == null || Key == -1) return;
-
         if (TYPE == "PRESS")
         {
             keybd_event(Key, 0, KEYDOWN, 0);
@@ -195,6 +233,16 @@ public class KeyInstruction : Instruction
         }
         else if (TYPE == "HOLD") keybd_event(Key, 0, KEYDOWN | 0x0001, 0);
         else if (TYPE == "RELEASE") keybd_event(Key, 0, KEYUP, 0);
+    }
+
+    public override string Compile()
+    {
+        if (TYPE == null) return "";
+        else
+        {
+            if (TYPE == "PRESS") return "KEY " + KeyName;
+            else return string.Format("KEY {0} {1}", KeyName, TYPE);
+        }
     }
 }
 
@@ -212,6 +260,7 @@ public static class WindowsAPI
 
     public static void InitKeyMap()
     {
+        #region Numbers and alphabet
         KeyMap.Add("0", 48);
         KeyMap.Add("1", 49);
         KeyMap.Add("2", 50);
@@ -249,7 +298,72 @@ public static class WindowsAPI
         KeyMap.Add("X", 88);
         KeyMap.Add("Y", 89);
         KeyMap.Add("Z", 90);
+        #endregion
+        #region F1-F124
+        KeyMap.Add("F1", 0x70);
+        KeyMap.Add("F2", 0x71);
+        KeyMap.Add("F3", 0x72);
+        KeyMap.Add("F4", 0x73);
+        KeyMap.Add("F5", 0x74);
+        KeyMap.Add("F6", 0x75);
+        KeyMap.Add("F7", 0x76);
+        KeyMap.Add("F8", 0x77);
+        KeyMap.Add("F9", 0x78);
+        KeyMap.Add("F10", 0x79);
+        KeyMap.Add("F11", 0x7A);
+        KeyMap.Add("F12", 0x7B);
+        KeyMap.Add("F13", 0x7C);
+        KeyMap.Add("F14", 0x7D);
+        KeyMap.Add("F15", 0x7E);
+        KeyMap.Add("F16", 0x7F);
+        KeyMap.Add("F17", 0x80);
+        KeyMap.Add("F18", 0x81);
+        KeyMap.Add("F19", 0x82);
+        KeyMap.Add("F20", 0x83);
+        KeyMap.Add("F21", 0x84);
+        KeyMap.Add("F22", 0x85);
+        KeyMap.Add("F23", 0x86);
+        KeyMap.Add("F24", 0x87);
+        #endregion
+        #region NUMPAD
+        KeyMap.Add("NUM0", 0x60);
+        KeyMap.Add("NUM1", 0x61);
+        KeyMap.Add("NUM2", 0x62);
+        KeyMap.Add("NUM3", 0x63);
+        KeyMap.Add("NUM4", 0x64);
+        KeyMap.Add("NUM5", 0x65);
+        KeyMap.Add("NUM6", 0x66);
+        KeyMap.Add("NUM7", 0x67);
+        KeyMap.Add("NUM8", 0x68);
+        KeyMap.Add("NUM9", 0x69);
+        #endregion
+
         KeyMap.Add("LWIN", 91);
         KeyMap.Add("RWIN", 92);
+        KeyMap.Add("ENTER", 0x0D);
+        KeyMap.Add("NONE", -1);
+    }
+
+    [DllImport("USER32.dll")]
+    public static extern short GetKeyState(int nVirtKey);
+}
+
+public static class PrasingHelper 
+{
+    public static bool isParam(string value, params string[] compare)
+    {
+        string upperValue = value.ToUpper();
+        for(int i = 0; i < compare.Length; i++)
+            if (compare[i].ToUpper() == upperValue) return true;
+
+        return false;
+    }
+    public static bool isParam(char value, string compare)
+    {
+        char upperValue = char.ToUpper(value);
+        for (int i = 0; i < compare.Length; i++)
+            if (upperValue == char.ToUpper(compare[i])) return true;
+
+        return false;
     }
 }

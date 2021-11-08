@@ -7,17 +7,49 @@
         mc:Ignorable="d"
         Title="Vule macro editor" Height="450" Width="800" AllowsTransparency="True" Background="Transparent" WindowStyle="None">
     <Grid>
+        <!--Header-->
         <Border VerticalAlignment="Top" Height="50" Background="Red" CornerRadius="16,16,0,0" MouseDown="HeaderMouseDown">
             <Grid>
+                <Label VerticalAlignment="Center" HorizontalAlignment="Center" Content="Vule macro" Foreground="White" FontSize="30"/>
                 <Ellipse Width="30" Height="30" HorizontalAlignment="Right" Margin="0,0,10,0" Fill="OrangeRed" Tag="0" MouseDown="EllipseMouseDown" MouseEnter="EllipseMouseEnter" MouseLeave="EllipseMouseLeave"/>
                 <Ellipse Width="30" Height="30" HorizontalAlignment="Right" Margin="0,0,50,0" Fill="DarkSeaGreen" Tag="1" MouseDown="EllipseMouseDown" MouseEnter="EllipseMouseEnter" MouseLeave="EllipseMouseLeave"/>
             </Grid>
         </Border>
+        <!--Body-->
         <Grid Margin="0,50,0,0">
-            <Grid.Background>
-                <SolidColorBrush Color="Red" Opacity="0.5"/>
-            </Grid.Background>
-            <Button Width="100" Height="30" Content="Create new" Margin="10,10,690,360"/>
+            <Grid x:Name="MainGrid">
+                <Grid.Background>
+                    <SolidColorBrush Color="Red" Opacity="0.65"/>
+                </Grid.Background>
+                <ListBox d:ItemsSource="{d:SampleData ItemCount=12}" Margin="10,59,576,10" Background="Red" Foreground="White" FontSize="20" BorderBrush="{x:Null}" x:Name="ScriptsListBox"/>
+                <local:VuleButton VerticalAlignment="Top" HorizontalAlignment="Left" Text="Create script" Margin="10,10,0,0" OnClick="CreatenewButtonOnclick"/>
+                <local:VuleButton VerticalAlignment="Top" HorizontalAlignment="Left" Text="Set bind" Margin="148,10,0,0" OnClick="SetbindOnClick"/>
+            </Grid>
+            <Border x:Name="CreateNewScriptGrid" HorizontalAlignment="Center" VerticalAlignment="Center" Width="300" Height="300" Visibility="Hidden" Background="#FFFF4A41" CornerRadius="16,16,0,0">
+                <Grid>
+                    <Border VerticalAlignment="Top" Height="40" Background="OrangeRed" CornerRadius="16,16,0,0">
+                        <Label Foreground="White" Content="Create new script" FontSize="22" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                    </Border>
+                    <Grid Margin="0,40,0,0">
+                        <local:VuleButton HorizontalAlignment="Left" Margin="225,216,0,0" VerticalAlignment="Top" Text="Create" x:Name="CreateScriptButton"/>
+                        <local:VuleButton HorizontalAlignment="Left" Margin="157,216,0,0" VerticalAlignment="Top" Text="Cancel" BackColor="Red" x:Name="CancelButton"/>
+                        <TextBox x:Name="NewScriptNameTB" VerticalAlignment="Center" HorizontalAlignment="Center" Width="200" Height="40"/>
+                    </Grid>
+                </Grid>
+            </Border>
+            <Border x:Name="SetbindGrid" HorizontalAlignment="Center" VerticalAlignment="Center" d:Visibility="Visible" Visibility="Hidden" Width="300" Height="300">
+                <Grid>
+                    <Border VerticalAlignment="Top" CornerRadius="16,16,0,0" Background="OrangeRed" Height="40">
+                        <Label Content="123456791234567890.vulem bind" Foreground="White" FontSize="19" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                    </Border>
+                    <Grid Margin="0,40,0,0" Background="#FFFF4A41">
+                        <Label Content="Press the key you want to bind" VerticalAlignment="Top" HorizontalAlignment="Center" Foreground="White" FontSize="20" Margin="0,10,0,0" x:Name="KeyBindText"/>
+                        <local:VuleButton Height="40" Width="100" Text="Cancel" BackColor="Red" Margin="85,210,115,10" OnClick="CancelBindButtonOnclick"/>
+                        <local:VuleButton Height="40" Width="100" Text="Set" Margin="190,210,10,10" OnClick="SetBindButtonClick"/>
+                    </Grid>
+                </Grid>
+            </Border>
         </Grid>
+
     </Grid>
 </Window>

@@ -23,6 +23,7 @@ public class MacroScript
             if (string.IsNullOrWhiteSpace(Lines[i])) continue;
 
             string[] Split = Lines[i].Split(' ');
+            if (Split[0][0] == '#') continue;
             Instruction instruction = null;
             switch (Split[0])
             {
@@ -33,6 +34,7 @@ public class MacroScript
                     instruction = new MouseInstruction();
                     break;
                 case "SLEEP":
+                case "WAIT":
                     instruction = new SleepInstruction();
                     break;
                 case "JUMP":
@@ -52,8 +54,21 @@ public class MacroScript
     }
     public void Execute()
     {
-        Console.WriteLine("Executing");
         for (CurrentLine = 0; CurrentLine < Instructions.Count; CurrentLine++)
             Instructions[CurrentLine].Execute();
+    }
+    public void SaveToFile(string FilePath)
+    {
+        List<string> Lines = new List<string>();
+        foreach(Instruction instruction in Instructions)
+            Lines.Add(instruction.Compile());
+        
+        try
+        {
+            File.WriteAllLines(FilePath, Lines.ToArray());
+        }catch(Exception ex)
+        {
+            Console.WriteLine(ex);
+        }
     }
 }
