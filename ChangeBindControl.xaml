@@ -1,0 +1,24 @@
+﻿<UserControl x:Class="vule_macro.ChangeBindControl"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:vule_macro"
+             mc:Ignorable="d" 
+             d:DesignHeight="300" d:DesignWidth="300">
+    <Grid>
+        <Border Height="40" VerticalAlignment="Top" CornerRadius="16,16,0,0" Background="OrangeRed">
+            <Label x:Name="UIScriptToBindNameLabel" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="20" Content="123456791234567890.vulem bind" Foreground="White"/>
+        </Border>
+        <Grid Margin="0,40,0,0" Background="#FFFF4A41" >
+            <Label HorizontalAlignment="Left" Margin="7,10,0,0" VerticalAlignment="Top" Content="Activate key     :" Foreground="White" FontSize="20" RenderTransformOrigin="0.5,0.5"/>
+            <Label HorizontalAlignment="Left" Margin="7,70,0,0" VerticalAlignment="Top" Content="Deactivate key :" Foreground="White" FontSize="20"/>
+            <Label Content="Enter" FontSize="20" Foreground="Blue" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="146,10,0,0" x:Name="UIActivateKeyBindLabel"/>
+            <local:VuleButton Height="40" Width="100" Text="Close" BackColor="Red" Margin="100,210,100,10" OnClick="CloseBindButtonClick"/>
+            <local:VuleButton Height="40" Text="Change" Margin="217,10,10,210" Tag="true" OnClick="ChangeKeyBindButton"/>
+            <local:VuleButton Height="40" Text="Change" Margin="217,69,10,151" Tag="false" OnClick="ChangeKeyBindButton"/>
+            <Label Content="Enter" FontSize="20" Foreground="Blue" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="146,71,0,0" x:Name="UIDeactivateKeyLabel"/>
+            <Label x:Name="UIKeyPressLabel" HorizontalAlignment="Center" VerticalAlignment="Center" Foreground="White" FontSize="20" Content="Waiting for key press..." d:Visibility="Visible" Visibility="Hidden"/>
+        </Grid>
+    </Grid>
+</UserControl>

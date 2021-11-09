@@ -1,27 +1,29 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
 using System.IO;
 using System.Threading;
-
-class ScriptEntry
+using static WindowsAPI;
+public class ScriptEntry
 {
-    public MacroScript Script;
+    public WindowsKey ActivateKey, DeactiveKey;
     public string FileName;
-    public int KeyBind;
-    public int LastKeyState;
+    public MacroScript Script;
     private Thread ExecuteThread;
     public bool Running = false;
     public ScriptEntry(string File)
     {
         Script = new MacroScript();
         Script.ParseFile(File);
-        KeyBind = 0xA3;
         FileName = File;
+        ActivateKey = new WindowsKey(KeyMap["NONE"]);
+        DeactiveKey = new WindowsKey(KeyMap["NONE"]);
     }
 
     public void Cancel()
     {
         if (Running)
         {
+            Console.WriteLine("Canceling " + Path.GetFileName(FileName));
             Running = false;
             if(ExecuteThread != null)
                 ExecuteThread.Abort();
@@ -45,5 +47,40 @@ class ScriptEntry
             });
             ExecuteThread.Start();
         }
+    }
+
+    public override string ToString()
+    {
+        return string.Format("FILE:'{0}' ToggleKey:{1} StopKey:{2}", FileName, ActivateKey.KeyID, DeactiveKey.KeyID);
+    }
+}
+
+struct ScriptEntryDTO
+{
+    public int ActivateKey, DectivateKey;
+    public string FileName;
+    public ScriptEntryDTO(ScriptEntry entry)
+    {
+        ActivateKey = entry.ActivateKey.KeyID;
+        DectivateKey = entry.DeactiveKey.KeyID;
+        FileName = entry.FileName;
+    }
+}
+
+public class WindowsKey
+{
+    public int KeyID;
+    public int LastPressedState;
+    public WindowsKey(int key) => KeyID = key;
+    public bool Pressed()
+    {
+        int state = GetKeyState(KeyID);
+        if(state < 0 && state != LastPressedState)
+        {
+            LastPressedState = state;
+            return true;
+        }
+
+        return false;
     }
 }

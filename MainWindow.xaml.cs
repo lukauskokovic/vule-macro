@@ -1,5 +1,7 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Threading;
@@ -13,18 +15,19 @@ namespace vule_macro
 {
     public partial class MainWindow : Window
     {
+        public static MainWindow Instance;
         List<ScriptEntry> ScriptEntries = new List<ScriptEntry>();
+        List<ScriptEntryDTO> LoadedSettings = new List<ScriptEntryDTO>();
         const string ScriptsPath = "Scripts";
         const string Extension = ".vulem";
-        int BindKey = -1;
-        Thread BindListenerThread;
-        Thread SetBindThread;
+
+        readonly Thread BindListenerThread;
         public MainWindow()
         {
+            Instance = this;
             InitializeComponent();
             DataContext = this;
             WindowsAPI.InitKeyMap();
-
             if (!Directory.Exists(ScriptsPath)) Directory.CreateDirectory(ScriptsPath);
             LoadScripts();
 
@@ -32,16 +35,17 @@ namespace vule_macro
             {
                 while (true)
                 {
-                    foreach (ScriptEntry entry in ScriptEntries)
+                    if (UISetBindControl.Visibility == Visibility.Hidden)
                     {
-                        int state = GetKeyState(entry.KeyBind);
-                        if (state == 1 || state == 0 || state == entry.LastKeyState) 
-                            continue;
+                        foreach (ScriptEntry entry in ScriptEntries)
+                        {
+                            if (entry.ActivateKey.Pressed()) entry.Start();
+                            else if (entry.DeactiveKey.Pressed()) entry.Cancel();
+                        }
 
-                        entry.LastKeyState = state;
-                        entry.Start();
+                        Thread.Sleep(20);
                     }
-                    Thread.Sleep(20);
+                    else Thread.Sleep(50);
                 }
             });
             BindListenerThread.Start();
@@ -56,85 +60,84 @@ namespace vule_macro
                 }
             };
 
-            CancelButton.OnClick += (s, args) =>
+            UICancelButton.OnClick += (s, args) =>
             {
-                CreateNewScriptGrid.Visibility = Visibility.Hidden;
-                MainGrid.IsEnabled = true;
+                UICreateNewScriptGrid.Visibility = Visibility.Hidden;
+                UIMainGrid.IsEnabled = true;
             };
 
-            CreateScriptButton.OnClick += (s, args) =>
+            UICreateScriptButton.OnClick += (s, args) =>
             {
-                string ScriptName = NewScriptNameTB.Text;
-                if (String.IsNullOrWhiteSpace(ScriptName)) return;
-                CreateNewScriptGrid.Visibility = Visibility.Hidden;
-                MainGrid.IsEnabled = true;
+                string ScriptName = UINewScriptNameTB.Text;
+                if (string.IsNullOrWhiteSpace(ScriptName)) return;
+                UICreateNewScriptGrid.Visibility = Visibility.Hidden;
+                UIMainGrid.IsEnabled = true;
                 File.WriteAllText(ScriptsPath + "//" + ScriptName + Extension, "#" + ScriptName + " script");
                 LoadScripts();
             };
+
+            UISetBindControl.Leaving += (s, args) => {
+                SaveSettings();
+                UIMainGrid.IsEnabled = true;
+                Console.WriteLine("Entry " + ScriptEntries[UIScriptsListBox.SelectedIndex].ToString());
+            };
+        }
+
+        public void SaveSettings()
+        {
+            string Json = JsonConvert.SerializeObject(ScriptEntries.Select(x => new ScriptEntryDTO(x)));
+            File.WriteAllText("settings.json", Json);
+            Console.WriteLine("Saving settings");
         }
 
         void LoadScripts()
         {
-            ScriptsListBox.Items.Clear();
+            UIScriptsListBox.Items.Clear();
             ScriptEntries.Clear();
+            if (File.Exists("settings.json"))
+            {
+                try
+                {
+                    LoadedSettings = JsonConvert.DeserializeObject<List<ScriptEntryDTO>>(File.ReadAllText("settings.json"));
+                }
+                catch
+                {
+                    LoadedSettings = new List<ScriptEntryDTO>();
+                }
+            }
             foreach (string File in Directory.EnumerateFiles(ScriptsPath).Where(x => System.IO.Path.GetExtension(x) == Extension))
             {
-                ScriptsListBox.Items.Add(System.IO.Path.GetFileNameWithoutExtension(File));
-                ScriptEntries.Add(new ScriptEntry(File));
-            }
-        }
-        private void SetbindOnClick(object sender, EventArgs e)
-        {
-            if (ScriptsListBox.SelectedIndex == -1) return;
-            SetBindThread = new Thread(() => 
-            {
-                while (true)
+                UIScriptsListBox.Items.Add(System.IO.Path.GetFileNameWithoutExtension(File));
+                ScriptEntry entry = new ScriptEntry(File);
+                foreach(ScriptEntryDTO dto in LoadedSettings)
                 {
-                    foreach(var Key in KeyMap)
+                    if(dto.FileName == entry.FileName)
                     {
-                        int state = GetKeyState(Key.Value);
-                        if(state < 0)
-                        {
-                            BindKey = Key.Value;
-                            Dispatcher.Invoke(() => KeyBindText.Content = "Selected button '" + Key.Key + "'");
-                            break;
-                        }
+                        entry.ActivateKey = new WindowsKey(dto.ActivateKey);
+                        entry.DeactiveKey = new WindowsKey(dto.DectivateKey);
                     }
-                    Thread.Sleep(20);
                 }
-            });
-            SetBindThread.Start();
-            SetbindGrid.Visibility = Visibility.Visible;
-            MainGrid.IsEnabled = false;
+                ScriptEntries.Add(entry);
+            }
         }
 
-        private void CancelBindButtonOnclick(object sender, EventArgs e)
-        {
-            MainGrid.IsEnabled = true;
-            SetbindGrid.Visibility = Visibility.Hidden;
-            try
-            {
-                SetBindThread.Abort();
-            }
-            catch { }
-        }
+
+        #region UI Code
         private void SetBindButtonClick(object sender, EventArgs e)
         {
-            if (BindKey == -1) return;
-            Console.WriteLine("Setting " + ScriptEntries[ScriptsListBox.SelectedIndex].FileName + " bind to " + KeyMap.First(x => x.Value == BindKey).Key);
-            ScriptEntries[ScriptsListBox.SelectedIndex].KeyBind = BindKey;
-            MainGrid.IsEnabled = true;
-            SetbindGrid.Visibility = Visibility.Hidden;
+            if (UIScriptsListBox.SelectedIndex == -1) return;
+
+            UIMainGrid.IsEnabled = false;
+            UISetBindControl.ChangeScript(ScriptEntries[UIScriptsListBox.SelectedIndex]);
         }
         private void CreatenewButtonOnclick(object sender, EventArgs e)
         {
-            if (CreateNewScriptGrid.Visibility == Visibility.Hidden)
+            if (UICreateNewScriptGrid.Visibility == Visibility.Hidden)
             {
-                CreateNewScriptGrid.Visibility = Visibility.Visible;
-                MainGrid.IsEnabled = false;
+                UICreateNewScriptGrid.Visibility = Visibility.Visible;
+                UIMainGrid.IsEnabled = false;
             }
         }
-        #region UI Code
         private void HeaderMouseDown(object sender, MouseButtonEventArgs e)
         {
             if (e.LeftButton == MouseButtonState.Pressed) DragMove();
@@ -153,8 +156,9 @@ namespace vule_macro
             var newBrush = new SolidColorBrush(Color.FromArgb(alpha, brush.Color.R, brush.Color.G, brush.Color.B));
             element.Fill = newBrush;
         }
+
         #endregion
 
-       
+        
     }
 }
