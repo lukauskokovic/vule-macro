@@ -30,7 +30,7 @@ namespace vule_macro
             WindowsAPI.InitKeyMap();
             if (!Directory.Exists(ScriptsPath)) Directory.CreateDirectory(ScriptsPath);
             LoadScripts();
-
+            
             BindListenerThread = new Thread(() =>
             {
                 while (true)
@@ -39,8 +39,17 @@ namespace vule_macro
                     {
                         foreach (ScriptEntry entry in ScriptEntries)
                         {
-                            if (entry.ActivateKey.Pressed()) entry.Start();
-                            else if (entry.DeactiveKey.Pressed()) entry.Cancel();
+                            if(entry.ActivateKey.KeyID == entry.DeactiveKey.KeyID && entry.ActivateKey.Pressed())
+                            {
+                                if (entry.Running) entry.Cancel();
+                                else entry.Start();
+                            }
+                            else if(entry.ActivateKey.KeyID != entry.DeactiveKey.KeyID)
+                            {
+                                if (entry.ActivateKey.Pressed()) entry.Start();
+                                else if (entry.DeactiveKey.Pressed()) entry.Cancel();
+                            }
+
                         }
 
                         Thread.Sleep(20);
