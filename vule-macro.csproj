@@ -5,7 +5,7 @@
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProjectGuid>{A07F9601-2BB4-4781-A292-8E1BF5F39F38}</ProjectGuid>
-    <OutputType>Exe</OutputType>
+    <OutputType>WinExe</OutputType>
     <RootNamespace>vule_macro</RootNamespace>
     <AssemblyName>vule-macro</AssemblyName>
     <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
