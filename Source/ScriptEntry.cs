@@ -1,5 +1,6 @@
 ﻿using Newtonsoft.Json;
 using System;
+using System.Diagnostics;
 using System.IO;
 using System.Threading;
 using static WindowsAPI;
@@ -36,13 +37,16 @@ public class ScriptEntry
             Running = true;
             ExecuteThread = new Thread(() =>
             {
+                Stopwatch stopwatch = Stopwatch.StartNew();
                 try
                 {
                     Script.Execute();
                 }
                 finally
                 {
+                    stopwatch.Stop();
                     Running = false;
+                    Console.WriteLine("'{0}' finished worked for {1}", Path.GetFileName(FileName), stopwatch.Elapsed);
                 }
             });
             ExecuteThread.Start();

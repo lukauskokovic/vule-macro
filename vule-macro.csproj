@@ -43,6 +43,7 @@
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Data" />
+    <Reference Include="System.Drawing" />
     <Reference Include="System.Xml" />
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="System.Core" />
@@ -61,17 +62,20 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
-    <Compile Include="ChangeBindControl.xaml.cs">
+    <Compile Include="UserControls\ChangeBindControl.xaml.cs">
       <DependentUpon>ChangeBindControl.xaml</DependentUpon>
     </Compile>
     <Compile Include="Source\Instruction.cs" />
     <Compile Include="Source\MacroScript.cs" />
     <Compile Include="Source\ScriptEntry.cs" />
     <Compile Include="Source\WindowsAPI.cs" />
-    <Compile Include="VuleButton.xaml.cs">
+    <Compile Include="UserControls\UIScriptItem.xaml.cs">
+      <DependentUpon>UIScriptItem.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="UserControls\VuleButton.xaml.cs">
       <DependentUpon>VuleButton.xaml</DependentUpon>
     </Compile>
-    <Page Include="ChangeBindControl.xaml">
+    <Page Include="UserControls\ChangeBindControl.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -87,9 +91,13 @@
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
-    <Page Include="VuleButton.xaml">
+    <Page Include="UserControls\UIScriptItem.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="UserControls\VuleButton.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
     </Page>
   </ItemGroup>
   <ItemGroup>
@@ -118,6 +126,9 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Resources\refresh.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

@@ -9,24 +9,23 @@ using System.Windows;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Shapes;
+using vule_macro.UserControls;
 using static WindowsAPI;
 
 namespace vule_macro
 {
     public partial class MainWindow : Window
     {
-        public static MainWindow Instance;
         List<ScriptEntry> ScriptEntries = new List<ScriptEntry>();
         List<ScriptEntryDTO> LoadedSettings = new List<ScriptEntryDTO>();
+        UIScriptItem SelectedItem = null;
         const string ScriptsPath = "Scripts";
         const string Extension = ".vulem";
 
         readonly Thread BindListenerThread;
         public MainWindow()
         {
-            Instance = this;
             InitializeComponent();
-            DataContext = this;
             WindowsAPI.InitKeyMap();
             if (!Directory.Exists(ScriptsPath)) Directory.CreateDirectory(ScriptsPath);
             LoadScripts();
@@ -58,7 +57,7 @@ namespace vule_macro
                 }
             });
             BindListenerThread.Start();
-
+            #region Hard coded events
             Closing += (s, args) =>
             {
                 BindListenerThread.Abort();
@@ -68,13 +67,11 @@ namespace vule_macro
                     entry.Cancel();
                 }
             };
-
             UICancelButton.OnClick += (s, args) =>
             {
                 UICreateNewScriptGrid.Visibility = Visibility.Hidden;
                 UIMainGrid.IsEnabled = true;
             };
-
             UICreateScriptButton.OnClick += (s, args) =>
             {
                 string ScriptName = UINewScriptNameTB.Text;
@@ -84,12 +81,11 @@ namespace vule_macro
                 File.WriteAllText(ScriptsPath + "//" + ScriptName + Extension, "#" + ScriptName + " script");
                 LoadScripts();
             };
-
             UISetBindControl.Leaving += (s, args) => {
                 SaveSettings();
                 UIMainGrid.IsEnabled = true;
-                Console.WriteLine("Entry " + ScriptEntries[UIScriptsListBox.SelectedIndex].ToString());
             };
+            #endregion
         }
 
         public void SaveSettings()
@@ -98,10 +94,9 @@ namespace vule_macro
             File.WriteAllText("settings.json", Json);
             Console.WriteLine("Saving settings");
         }
-
         void LoadScripts()
         {
-            UIScriptsListBox.Items.Clear();
+            UIScriptsStackPanel.Children.Clear();
             ScriptEntries.Clear();
             if (File.Exists("settings.json"))
             {
@@ -116,11 +111,14 @@ namespace vule_macro
             }
             foreach (string File in Directory.EnumerateFiles(ScriptsPath).Where(x => System.IO.Path.GetExtension(x) == Extension))
             {
-                UIScriptsListBox.Items.Add(System.IO.Path.GetFileNameWithoutExtension(File));
-                ScriptEntry entry = new ScriptEntry(File);
-                foreach(ScriptEntryDTO dto in LoadedSettings)
+                var entry = new ScriptEntry(File);
+                var item = new UIScriptItem(entry);
+                item.RefreshEntry += UIItemRefreshEntry;
+                UIScriptsStackPanel.Children.Add(item);
+
+                foreach (ScriptEntryDTO dto in LoadedSettings)
                 {
-                    if(dto.FileName == entry.FileName)
+                    if (dto.FileName == entry.FileName)
                     {
                         entry.ActivateKey = new WindowsKey(dto.ActivateKey);
                         entry.DeactiveKey = new WindowsKey(dto.DectivateKey);
@@ -129,15 +127,13 @@ namespace vule_macro
                 ScriptEntries.Add(entry);
             }
         }
-
-
         #region UI Code
         private void SetBindButtonClick(object sender, EventArgs e)
         {
-            if (UIScriptsListBox.SelectedIndex == -1) return;
+            if (SelectedItem == null) return;
 
             UIMainGrid.IsEnabled = false;
-            UISetBindControl.ChangeScript(ScriptEntries[UIScriptsListBox.SelectedIndex]);
+            UISetBindControl.ChangeScript(SelectedItem.Entry);
         }
         private void CreatenewButtonOnclick(object sender, EventArgs e)
         {
@@ -158,16 +154,36 @@ namespace vule_macro
         }
         private void EllipseMouseEnter(object sender, MouseEventArgs e) => ui_set_alpha(175, sender);
         private void EllipseMouseLeave(object sender, MouseEventArgs e) => ui_set_alpha(255, sender);
-        static void ui_set_alpha(byte alpha, object uicontrol)
+        private void ui_set_alpha(byte alpha, object uicontrol)
         {
             Shape element = (Shape)uicontrol;
             SolidColorBrush brush = (SolidColorBrush)element.Fill;
             var newBrush = new SolidColorBrush(Color.FromArgb(alpha, brush.Color.R, brush.Color.G, brush.Color.B));
             element.Fill = newBrush;
         }
+        private void ui_set_selected(UIScriptItem item)
+        {
+            if (SelectedItem != null) SelectedItem.SetSelected(false);
 
+            SelectedItem = item;
+            SelectedItem.SetSelected(true);
+            UIFileContentLabel.Content = File.ReadAllText(SelectedItem.Entry.FileName);
+        }
+        private void UIItemMouseDown(object sender, MouseButtonEventArgs e)
+        {
+            if (e.LeftButton == MouseButtonState.Pressed)
+                ui_set_selected(sender as UIScriptItem);
+        }
+        private void UIItemRefreshEntry(object sender, EventArgs e)
+        {
+            Console.WriteLine(sender.GetType());
+            UIScriptItem item = sender as UIScriptItem;
+            ui_set_selected(item);
+            item.Entry.Cancel();
+            item.Entry.Script.ParseFile(item.Entry.FileName);
+            Console.WriteLine("Loaded script again");
+            UIFileContentLabel.Content = File.ReadAllText(SelectedItem.Entry.FileName);
+        }
         #endregion
-
-        
     }
 }

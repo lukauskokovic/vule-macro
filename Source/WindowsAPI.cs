@@ -91,15 +91,75 @@ public static class WindowsAPI
         KeyMap.Add("NUM7", 0x67);
         KeyMap.Add("NUM8", 0x68);
         KeyMap.Add("NUM9", 0x69);
+        KeyMap.Add("NUM+", 0x6B);
+        KeyMap.Add("NUM-", 0x6D);
+        KeyMap.Add("NUM*", 0x6A);
+        KeyMap.Add("NUM,", 0x6E);
+        KeyMap.Add("NUM/", 0x6F);
         #endregion
-
+        #region Arrows
+        KeyMap.Add("LEFT", 0x25);
+        KeyMap.Add("RIGHT", 0x27);
+        KeyMap.Add("UP", 0x26);
+        KeyMap.Add("DOWN", 0x28);
+        #endregion
+        #region Insert-PageDown
+        KeyMap.Add("PAGEUP", 0x21);
+        KeyMap.Add("PAGEDOWN", 0x22);
+        KeyMap.Add("END", 0x23);
+        KeyMap.Add("HOME", 0x24);
+        KeyMap.Add("INSERT", 0x2D);
+        KeyMap.Add("DELETE", 0x2E);
+        #endregion
+        #region Bottom line
         KeyMap.Add("LWIN", 91);
         KeyMap.Add("RWIN", 92);
+        KeyMap.Add("SHIFT", 0x10);
+        KeyMap.Add("CTRL", 0x11);
+        KeyMap.Add("LCTRL", 0xA2);
+        KeyMap.Add("RCTRL", 0xA3);
+        KeyMap.Add("ALT", 0x12);
+        KeyMap.Add("SPACE", 0x20);
+        #endregion
+        #region PrntSc-Pausebreak
+        KeyMap.Add("PAUSE", 0x13);
+        #endregion
+        #region Special keys
+        KeyMap.Add("PLUS", 0xBB);
+        KeyMap.Add("MINUS", 0xBD);
+        KeyMap.Add("COMMA", 0xBC);
+        KeyMap.Add("DOT", 0xBE);
+        KeyMap.Add("[", 0xDB);
+        KeyMap.Add("]", 0xDD);
+        KeyMap.Add("BACKSLASH", 0xDC);
+        KeyMap.Add("\"", 0xDE);
+        #endregion
+
         KeyMap.Add("ENTER", 0x0D);
         KeyMap.Add("BACKSPACE", 0x08);
         KeyMap.Add("NONE", -1);
+        KeyMap.Add("TAB", 0x09);
+        KeyMap.Add("ESC", 0x1B);
+       
     }
 
     [DllImport("USER32.dll")]
     public static extern short GetKeyState(int nVirtKey);
+    [DllImport("user32.dll", SetLastError = true)]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    public static extern bool GetCursorPos(out POINT lpPoint);
+
+    [StructLayout(LayoutKind.Sequential)]
+    public struct POINT
+    {
+        public int X;
+        public int Y;
+
+        public POINT(int x, int y)
+        {
+            this.X = x;
+            this.Y = y;
+        }
+    }
+
 }

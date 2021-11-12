@@ -1,0 +1,19 @@
+﻿<UserControl x:Class="vule_macro.UserControls.UIScriptItem"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:vule_macro.UserControls" xmlns:vule_macro="clr-namespace:vule_macro"
+             mc:Ignorable="d" 
+             d:DesignHeight="40" d:DesignWidth="258" Height="40" Width="258">
+    <Border x:Name="UIMainBorder" CornerRadius="9" Background="OrangeRed" BorderBrush="#FFFDFF0F" BorderThickness="0">
+        <Grid>
+            <vule_macro:VuleButton HorizontalAlignment="Left" VerticalAlignment="Center" Width="28" Height="28" Margin="4,0,0,0" MouseEnter="VuleButton_MouseEnter" MouseLeave="VuleButton_MouseLeave" MouseDown="VuleButton_MouseDown">
+                <vule_macro:VuleButton.BackColor>
+                    <ImageBrush ImageSource="/resources/refresh.png"/>
+                </vule_macro:VuleButton.BackColor>
+            </vule_macro:VuleButton>
+            <Label x:Name="UIScriptName" Content="Script name" HorizontalAlignment="Left" Margin="37,0,0,0" VerticalAlignment="Center" Foreground="White"/>
+        </Grid>
+    </Border>
+</UserControl>

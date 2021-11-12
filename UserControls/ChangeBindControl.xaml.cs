@@ -53,7 +53,7 @@ namespace vule_macro
                                 (ActiveKey ? UIActivateKeyBindLabel : UIDeactivateKeyLabel).Content = key.Key == "BACKSPACE"? "NONE" : key.Key;
                             });
                             (ActiveKey? Entry.ActivateKey : Entry.DeactiveKey).KeyID = key.Key == "BACKSPACE"? -1 : key.Value;
-                            break;
+                            Thread.CurrentThread.Abort();
                         }
                     }
                     Thread.Sleep(20);

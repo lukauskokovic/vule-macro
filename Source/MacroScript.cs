@@ -11,6 +11,7 @@ public class MacroScript
 
     public void ParseFile(string FilePath)
     {
+        var watch = System.Diagnostics.Stopwatch.StartNew();
         if (!File.Exists(FilePath))
         {
             Console.Write("file:{0} does not exist.", FilePath);
@@ -51,6 +52,8 @@ public class MacroScript
                 Instructions.Add(instruction);
             }
         }
+        watch.Stop();
+        Console.WriteLine("Parsing {0} took {1}ms", FilePath, watch.ElapsedMilliseconds);
     }
     public void Execute()
     {
