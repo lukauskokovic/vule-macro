@@ -106,8 +106,8 @@ public class CursorInstruction : Instruction
 }
 /// <summary>
 /// Example
-/// MOUSE DOWN LEFT
-/// MOUSE UP RIGHT
+/// MOUSE LEFT DOWN
+/// MOUSE RIGHT UP
 /// </summary>
 public class MouseInstruction : Instruction
 {
@@ -118,26 +118,26 @@ public class MouseInstruction : Instruction
 
     private const uint RIGHT_UP = 0x0010,
                        RIGHT_DOWN = 0x0008,
-                       LEFT_DOWN = 0x0002,
-                       LEFT_UP = 0x0004;
+                       LEFT_DOWN = 2,
+                       LEFT_UP = 4;
 
     public override void Parse()
     {
-        if(parameters.Length == 1)
+        if (parameters.Length == 1)
         {
             if (!IsParam(parameters[0], "LEFT", "RIGHT")) return;
             Direction = "PRESS";
             Button = parameters[0].ToUpper();
             return;
         }
-
+        
         if (parameters.Length != 2) return;
+       
         parameters[0] = parameters[0].ToUpper();
         parameters[1] = parameters[1].ToUpper();
-
-        if (!IsParam(parameters[0], "UP", "DOWN") || !IsParam(parameters[1], "LEFT", "RIGHT")) return;
-        Direction = parameters[0];
-        Button = parameters[1];
+        if (!IsParam(parameters[1], "UP", "DOWN") || !IsParam(parameters[0], "LEFT", "RIGHT")) return;
+        Direction = parameters[1];
+        Button = parameters[0];
 
         Console.WriteLine("\tMOUSE> Direction:'{0}' Button:'{1}'", Direction, Button);
     }

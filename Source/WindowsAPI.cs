@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Runtime.InteropServices;
 
 public static class WindowsAPI
@@ -6,7 +7,7 @@ public static class WindowsAPI
     [DllImport("user32.dll", SetLastError = true)]
     public static extern void keybd_event(int bVk, byte bScan, int dwFlags, int dwExtraInfo);
     [DllImport("user32.dll")]
-    public static extern void mouse_event(uint dwFlags, int dx, int dy, uint dwData, uint dwExtraInfo);
+    public static extern void mouse_event(uint dwFlags, int dx, int dy, uint dwData, int dwExtraInfo);
     [DllImport("user32.dll")]
     [return: MarshalAs(UnmanagedType.Bool)]
     public static extern bool SetCursorPos(int x, int y);

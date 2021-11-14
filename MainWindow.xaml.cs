@@ -40,13 +40,13 @@ namespace vule_macro
                         {
                             if(entry.ActivateKey.KeyID == entry.DeactiveKey.KeyID && entry.ActivateKey.Pressed())
                             {
-                                if (entry.Running) entry.Cancel();
-                                else entry.Start();
+                                if (entry.Running) StopScript(entry);
+                                else StartScript(entry);
                             }
                             else if(entry.ActivateKey.KeyID != entry.DeactiveKey.KeyID)
                             {
-                                if (entry.ActivateKey.Pressed()) entry.Start();
-                                else if (entry.DeactiveKey.Pressed()) entry.Cancel();
+                                if (entry.ActivateKey.Pressed()) StartScript(entry);
+                                else if (entry.DeactiveKey.Pressed()) StopScript(entry);
                             }
 
                         }
@@ -79,6 +79,7 @@ namespace vule_macro
                 UICreateNewScriptGrid.Visibility = Visibility.Hidden;
                 UIMainGrid.IsEnabled = true;
                 File.WriteAllText(ScriptsPath + "//" + ScriptName + Extension, "#" + ScriptName + " script");
+                UINewScriptNameTB.Clear();
                 LoadScripts();
             };
             UISetBindControl.Leaving += (s, args) => {
@@ -93,6 +94,37 @@ namespace vule_macro
             string Json = JsonConvert.SerializeObject(ScriptEntries.Select(x => new ScriptEntryDTO(x)));
             File.WriteAllText("settings.json", Json);
             Console.WriteLine("Saving settings");
+        }
+        void StartScript(ScriptEntry entry)
+        {
+            Dispatcher.Invoke(() => 
+            {
+                foreach (UIScriptItem item in UIScriptsStackPanel.Children.OfType<UIScriptItem>())
+                {
+                    if (item.Entry == entry)
+                    {
+                        item.SetRunning(true);
+                        break;
+                    }
+                }
+            });
+            entry.Start();
+        }
+
+        void StopScript(ScriptEntry entry)
+        {
+            Dispatcher.Invoke(() => 
+            {
+                foreach(UIScriptItem item in UIScriptsStackPanel.Children.OfType<UIScriptItem>())
+                {
+                    if(item.Entry == entry)
+                    { 
+                        item.SetRunning(false);
+                        break;
+                    }
+                }
+            });
+            entry.Cancel();
         }
         void LoadScripts()
         {
@@ -114,6 +146,7 @@ namespace vule_macro
                 var entry = new ScriptEntry(File);
                 var item = new UIScriptItem(entry);
                 item.RefreshEntry += UIItemRefreshEntry;
+                entry.ScriptFinished += (s, args) => Dispatcher.Invoke(() => item.SetRunning(false));
                 UIScriptsStackPanel.Children.Add(item);
 
                 foreach (ScriptEntryDTO dto in LoadedSettings)
@@ -165,9 +198,16 @@ namespace vule_macro
         {
             if (SelectedItem != null) SelectedItem.SetSelected(false);
 
+            UIScriptCode.Visibility = item != null ? Visibility.Visible : Visibility.Hidden;
+            if (item == null)
+            {
+                SelectedItem = null;
+                return;
+            }
             SelectedItem = item;
             SelectedItem.SetSelected(true);
-            UIFileContentLabel.Content = File.ReadAllText(SelectedItem.Entry.FileName);
+            UIScriptCode.Clear();
+            UIScriptCode.Text = File.ReadAllText(SelectedItem.Entry.FileName);
         }
         private void UIItemMouseDown(object sender, MouseButtonEventArgs e)
         {
@@ -178,11 +218,30 @@ namespace vule_macro
         {
             Console.WriteLine(sender.GetType());
             UIScriptItem item = sender as UIScriptItem;
-            ui_set_selected(item);
-            item.Entry.Cancel();
+            StopScript(item.Entry);
             item.Entry.Script.ParseFile(item.Entry.FileName);
+            ui_set_selected(item);
             Console.WriteLine("Loaded script again");
-            UIFileContentLabel.Content = File.ReadAllText(SelectedItem.Entry.FileName);
+        }
+        private void UIDeleteScriptButton(object sender, EventArgs e)
+        {
+            if (SelectedItem == null) return;
+
+            MessageBoxResult result = MessageBox.Show("Are you sure you want to delete " + SelectedItem.Entry.FileName, "Yes or no", MessageBoxButton.YesNo);
+            if(result == MessageBoxResult.Yes)
+            {
+                File.Delete(SelectedItem.Entry.FileName);
+                ui_set_selected(null);
+                LoadScripts();
+            }
+        }
+        private void UISaveButtonClick(object sender, EventArgs e)
+        {
+            if (SelectedItem == null) return;
+
+            StopScript(SelectedItem.Entry);
+            File.WriteAllText(SelectedItem.Entry.FileName, UIScriptCode.Text);
+            SelectedItem.Entry.Script.ParseFile(SelectedItem.Entry.FileName);
         }
         #endregion
     }

@@ -1,6 +1,7 @@
 ﻿using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using System.Windows.Media;
 
 namespace vule_macro.UserControls
 {
@@ -28,6 +29,7 @@ namespace vule_macro.UserControls
         }
 
         public void SetSelected(bool selected = false) => UIMainBorder.BorderThickness = new Thickness(selected ? 1 : 0);
+        public void SetRunning(bool running) => UIMainBorder.Background = new SolidColorBrush(running ? Colors.LightGreen : Color.FromRgb(255, 47, 47));
 
         private void VuleButton_MouseDown(object sender, MouseButtonEventArgs e)
         {

@@ -11,6 +11,7 @@ public class ScriptEntry
     public MacroScript Script;
     private Thread ExecuteThread;
     public bool Running = false;
+    public event EventHandler ScriptFinished;
     public ScriptEntry(string File)
     {
         Script = new MacroScript();
@@ -47,6 +48,7 @@ public class ScriptEntry
                     stopwatch.Stop();
                     Running = false;
                     Console.WriteLine("'{0}' finished worked for {1}", Path.GetFileName(FileName), stopwatch.Elapsed);
+                    ScriptFinished?.Invoke(this, null);
                 }
             });
             ExecuteThread.Start();

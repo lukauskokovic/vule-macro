@@ -11,6 +11,7 @@ public class MacroScript
 
     public void ParseFile(string FilePath)
     {
+        Instructions = new List<Instruction>();
         var watch = System.Diagnostics.Stopwatch.StartNew();
         if (!File.Exists(FilePath))
         {

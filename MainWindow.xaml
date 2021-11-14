@@ -23,21 +23,29 @@
                     <SolidColorBrush Color="Red" Opacity="0.65"/>
                 </Grid.Background>
                 <local:VuleButton VerticalAlignment="Top" HorizontalAlignment="Left" Text="Create script" Margin="10,10,0,0" OnClick="CreatenewButtonOnclick"/>
-                <local:VuleButton VerticalAlignment="Top" HorizontalAlignment="Left" Text="Change bind" Margin="157,10,0,0" OnClick="SetBindButtonClick"/>
-                <Label x:Name="UIFileContentLabel" Content="Label" HorizontalAlignment="Left" Margin="279,53,0,0" VerticalAlignment="Top" Foreground="White" FontSize="20" Height="337" Width="511" d:Background="Green"/>
-                <ScrollViewer HorizontalScrollBarVisibility="Hidden" VerticalScrollBarVisibility="Hidden" Width="258" Margin="10,53,532,10" d:Background="Black">
-                    <StackPanel x:Name="UIScriptsStackPanel">
-                        <StackPanel.Resources>
-                            <Style TargetType="UserControls:UIScriptItem">
-                                <Setter Property="Margin" Value="0,0,0,10"/>
-                                <Setter Property="HorizontalAlignment" Value="Center"/>
-                                <EventSetter Event="MouseDown" Handler="UIItemMouseDown" />
-                            </Style>
-                        </StackPanel.Resources>
-                    </StackPanel>
-                </ScrollViewer>
+                <local:VuleButton VerticalAlignment="Top" HorizontalAlignment="Left" Text="Change bind" Margin="125,10,0,0" OnClick="SetBindButtonClick"/>
+                <Border Margin="284,53,10,10" Background="OrangeRed" CornerRadius="22">
+                    <TextBox Background="Transparent" d:Background="DarkGreen" Margin="10,10,10,10" BorderThickness="0" Foreground="White" FontSize="15" x:Name="UIScriptCode" AcceptsReturn="True" AcceptsTab="True"> 
+                        
+                    </TextBox>
+                </Border>
+                <Border Margin="10,53,532,10" CornerRadius="16" d:Background="Black" Background="OrangeRed">
+                    <ScrollViewer HorizontalScrollBarVisibility="Hidden" VerticalScrollBarVisibility="Hidden" Margin="10,10,10,10" d:Background="Green">
+                        <StackPanel x:Name="UIScriptsStackPanel">
+                            <StackPanel.Resources>
+                                <Style TargetType="UserControls:UIScriptItem">
+                                    <Setter Property="Margin" Value="0,0,0,10"/>
+                                    <Setter Property="HorizontalAlignment" Value="Center"/>
+                                    <EventSetter Event="MouseDown" Handler="UIItemMouseDown" />
+                                </Style>
+                            </StackPanel.Resources>
+                        </StackPanel>
+                    </ScrollViewer>
+                </Border>
+                <local:VuleButton VerticalAlignment="Top" HorizontalAlignment="Left" Text="Delete script" Margin="241,10,0,0" OnClick="UIDeleteScriptButton"/>
+                <local:VuleButton VerticalAlignment="Top" HorizontalAlignment="Left" Text="Save script" Margin="356,10,0,0" OnClick="UISaveButtonClick"/>
             </Grid>
-            <Border x:Name="UICreateNewScriptGrid" HorizontalAlignment="Center" VerticalAlignment="Center" Width="300" Height="300" Visibility="Hidden" Background="#FFFF4A41" CornerRadius="16,16,0,0">
+            <Border x:Name="UICreateNewScriptGrid" HorizontalAlignment="Center" VerticalAlignment="Center" Width="300" Height="300" Visibility="Hidden" CornerRadius="16,16,0,0" Background="#FFFF4A41">
                 <Grid>
                     <Border VerticalAlignment="Top" Height="40" Background="OrangeRed" CornerRadius="16,16,0,0">
                         <Label Foreground="White" Content="Create new script" FontSize="22" HorizontalAlignment="Center" VerticalAlignment="Center"/>
@@ -45,7 +53,9 @@
                     <Grid Margin="0,40,0,0">
                         <local:VuleButton HorizontalAlignment="Left" Margin="225,216,0,0" VerticalAlignment="Top" Text="Create" x:Name="UICreateScriptButton"/>
                         <local:VuleButton HorizontalAlignment="Left" Margin="157,216,0,0" VerticalAlignment="Top" Text="Cancel" BackColor="Red" x:Name="UICancelButton"/>
-                        <TextBox x:Name="UINewScriptNameTB" VerticalAlignment="Center" HorizontalAlignment="Center" Width="200" Height="40"/>
+                        <Border Margin="42,105,42,105" Background="OrangeRed" CornerRadius="16" BorderThickness="0">
+                            <TextBox x:Name="UINewScriptNameTB" Background="{x:Null}" Foreground="White" BorderThickness="0" d:Text="Nigger" VerticalContentAlignment="Center" Margin="10,0,0,0" FontSize="20"/>
+                        </Border>
                     </Grid>
                 </Grid>
             </Border>
