@@ -26,5 +26,4 @@ X Y = x y axis
 <img src="https://user-images.githubusercontent.com/49611825/142741084-28c09200-26e2-4445-8151-e8396d47f138.PNG" />
   <h2>This shows the menu in wich you can change the button on wich you want to run the script</h2>
 <img src="https://user-images.githubusercontent.com/49611825/142741194-053ac962-b0d9-4197-af39-cd540fa0a8f4.PNG" />
-  <h2> This shows a menu in wich the script is running</h2>
 <img src="https://user-images.githubusercontent.com/49611825/142741210-eb066458-2557-4443-8a72-58440f6827d4.PNG" />
