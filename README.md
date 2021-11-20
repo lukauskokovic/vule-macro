@@ -22,3 +22,6 @@ CURSOR = used for simulating cursor movement
 POS/MOVE = pos stands for position wich is used to set the cursor to specified position on screen, move is used for moving the cursor from its current position
 X Y = x y axis
 
+  <h2>This shows the main menu</h2>
+![Mainmenu](https://user-images.githubusercontent.com/49611825/142741084-28c09200-26e2-4445-8151-e8396d47f138.PNG)
+ 
